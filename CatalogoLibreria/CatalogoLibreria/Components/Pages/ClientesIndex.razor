@@ -1,0 +1,65 @@
+﻿
+@page "/clientes"
+@rendermode InteractiveServer
+@inject NavigationManager _navigator;
+@inject IRepositorioClientes _repositorio;
+
+<h3>Clientes</h3>
+<a class="btn btn-success" href="clientes/nueva">Nuevo</a>
+@if (_clientes == null)
+{
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+else if (_clientes.Count == 0)
+{
+    <h3>No hay clientes</h3>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Telefono</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cliente in _clientes)
+            {
+                <tr>
+                    <td>@cliente.Nombre</td>
+                    <td>@cliente.Correo</td>
+                    <td>@cliente.Telefono</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => Modificar(cliente.ID)">Editar</button>
+                        <button class="btn btn-danger" @onclick="() => Eliminar(cliente)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Cliente>? _clientes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _clientes = await _repositorio.GetAll();
+    }
+
+    private async Task Eliminar(Cliente cliente)
+    {
+        await _repositorio.Delete(cliente.ID);
+        _clientes!.Remove(cliente);
+    }
+
+    private void Modificar(int id)
+    {
+        _navigator.NavigateTo($"/clientes/editar/{id}");
+    }
+}
